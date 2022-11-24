@@ -44,7 +44,7 @@ def process_keypress(event, keyboard):
 
     if event.pressed:
         if event.key_number == 0:
-            layout.write('Owen is a hacker!')
+            layout.write("\n\nCheers,\nMichael Daugherty")
         elif event.key_number == 1:
             return  # Do nothing; the button is not working
             # keyboard.press(Keycode.COMMAND, Keycode.SPACE)
@@ -58,7 +58,6 @@ def process_keypress(event, keyboard):
             keyboard.press(KEYMAP[event.key_number])
     else:
         keyboard.release_all()
-
 
 # -------------------------------------------------------------------------------
 # You don't need to change anything below this line, but its fun to follow along!

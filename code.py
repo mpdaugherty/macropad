@@ -15,6 +15,7 @@ from adafruit_hid.keycode import Keycode
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
 
 # character codes assigned to each button
+# From https://docs.circuitpython.org/projects/hid/en/latest/_modules/adafruit_hid/keycode.html
 KEYMAP = [
     Keycode.B, Keycode.B, Keycode.B,
     Keycode.B, Keycode.B, Keycode.C,

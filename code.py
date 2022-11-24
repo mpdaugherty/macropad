@@ -21,13 +21,100 @@ KEYMAP = [
     Keycode.D, Keycode.B, Keycode.BACKSPACE
 ]
 
+current_layer = 4
+
+def handle_vs(event, keyboard):
+    layout = KeyboardLayoutUS(keyboard)
+
+    if event.pressed:
+        if event.key_number == 0:
+            layout.write("# This is Visual Studio Mode")
+        elif event.key_number == 1:
+            return  # Do nothing; the button is not working
+            # keyboard.press(Keycode.COMMAND, Keycode.SPACE)
+        elif event.key_number == 2:
+            # Toggle comments in Visual Studio Code
+            keyboard.press(Keycode.COMMAND, Keycode.FORWARD_SLASH)
+        elif event.key_number == 3:
+            # Re-format code in Visual Studio Code
+            keyboard.press(Keycode.SHIFT, Keycode.OPTION, Keycode.F)
+        elif event.key_number == 4:
+            set_app_switching(keyboard)
+        elif event.key_number == 8:
+            # Toggle Full Screen
+            keyboard.press(Keycode.CONTROL, Keycode.COMMAND, Keycode.F)
+        else:
+            keyboard.press(KEYMAP[event.key_number])
+    else:
+        keyboard.release_all()
+
+
+def handle_superhuman(event, keyboard):
+    layout = KeyboardLayoutUS(keyboard)
+
+    if event.pressed:
+        if event.key_number == 0:
+            layout.write("\n\nCheers,\nMichael Daugherty")
+        elif event.key_number == 1:
+            return  # Do nothing; the button is not working
+            # keyboard.press(Keycode.COMMAND, Keycode.SPACE)
+        elif event.key_number == 2:
+            # Create a new email and refer to the previous email
+            keyboard.press(Keycode.C)
+            keyboard.release(Keycode.C)
+            keyboard.press(Keycode.COMMAND, Keycode.SHIFT, Keycode.P)
+        elif event.key_number == 3:
+            layout.write("Hello!")
+        elif event.key_number == 4:
+            set_app_switching(keyboard)
+        elif event.key_number == 8:
+            # Toggle Full Screen
+            keyboard.press(Keycode.CONTROL, Keycode.COMMAND, Keycode.F)
+        else:
+            keyboard.press(KEYMAP[event.key_number])
+    else:
+        keyboard.release_all()        
+
+def handle_app_switching(event, keyboard):
+    global current_layer
+    layout = KeyboardLayoutUS(keyboard)
+    if event.pressed:
+        if event.key_number == 0:
+            layout.write("Visual Studio Code")
+            keyboard.press(Keycode.ENTER)
+            current_layer = 0
+        if event.key_number == 2:
+            layout.write("Superhuman")
+            keyboard.press(Keycode.ENTER)
+            current_layer = 1
+        if event.key_number == 4:
+            set_app_switching(keyboard)
+    else:
+        keyboard.release_all()
+
+def set_app_switching(keyboard):
+    global current_layer
+    keyboard.press(Keycode.COMMAND, Keycode.SPACE)
+    keyboard.release(Keycode.COMMAND, Keycode.SPACE)
+    current_layer = 4
+
+LAYERS = [
+  handle_vs,
+  handle_superhuman,
+  None,
+  None,
+  handle_app_switching
+]
 
 def process_keypress(event, keyboard):
+    global current_layer
+
     """Handle each key press/release event. Add your custom macro pad behavior here.
 
     event.key_number is the index of the key that was pressed (0-8 top to bottom, left to right)
     """
     print(event)
+    print(current_layer)
 
     # by default we just look up a key from the keymap and send its keycode
     # see what you can do with Keyboard module here: https://learn.adafruit.com/circuitpython-essentials/circuitpython-hid-keyboard-and-mouse
@@ -42,26 +129,22 @@ def process_keypress(event, keyboard):
 
     layout = KeyboardLayoutUS(keyboard)
 
-    if event.pressed:
-        if event.key_number == 0:
-            layout.write("\n\nCheers,\nMichael Daugherty")
-        elif event.key_number == 1:
-            return  # Do nothing; the button is not working
-            # keyboard.press(Keycode.COMMAND, Keycode.SPACE)
-        elif event.key_number == 2:
-            # Toggle comments in Visual Studio Code
-            keyboard.press(Keycode.COMMAND, Keycode.FORWARD_SLASH)
-        elif event.key_number == 3:
-            # Re-format code in Visual Studio Code
-            keyboard.press(Keycode.SHIFT, Keycode.OPTION, Keycode.F)
-        else:
-            keyboard.press(KEYMAP[event.key_number])
+    if LAYERS[current_layer]:
+        LAYERS[current_layer](event, keyboard)
     else:
-        keyboard.release_all()
+        if event.pressed:
+            if event.key_number == 4:
+                set_app_switching(keyboard)
+            else:
+                keyboard.press(KEYMAP[event.key_number])        
+        else:
+            keyboard.release_all()
+        current_layer = 4
 
 # -------------------------------------------------------------------------------
 # You don't need to change anything below this line, but its fun to follow along!
 # -------------------------------------------------------------------------------
+
 
 SLEEP_TIMEOUT = 5          # sleep after 5 seconds of inactivity
 SLEEP_DURATION = 0.05      # sleep 50ms at a time to not miss any keypresses

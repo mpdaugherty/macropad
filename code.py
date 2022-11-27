@@ -14,14 +14,10 @@ from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keycode import Keycode
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS
 
-# character codes assigned to each button
-# From https://docs.circuitpython.org/projects/hid/en/latest/_modules/adafruit_hid/keycode.html
-KEYMAP = [
-    Keycode.B, Keycode.B, Keycode.B,
-    Keycode.B, Keycode.B, Keycode.C,
-    Keycode.D, Keycode.B, Keycode.BACKSPACE
-]
+# Keycode character code documentation is at
+# https://docs.circuitpython.org/projects/hid/en/latest/_modules/adafruit_hid/keycode.html
 
+# Default to app-switching layer
 current_layer = 4
 
 def handle_vs(event, keyboard):
@@ -74,7 +70,41 @@ def handle_superhuman(event, keyboard):
         else:
             keyboard.press(KEYMAP[event.key_number])
     else:
-        keyboard.release_all()        
+        keyboard.release_all()
+
+def handle_roam(event, keyboard):
+    layout = KeyboardLayoutUS(keyboard)
+
+    if event.pressed:
+        if event.key_number == 0:
+            # Toggle sidebar
+            keyboard.press(Keycode.COMMAND, Keycode.FORWARD_SLASH)
+        elif event.key_number == 1:
+            return  # Do nothing; the button is not working
+        elif event.key_number == 2:
+            # Go to current day, open a new block, and zoom into it for a blank editing experience
+            keyboard.press(Keycode.CONTROL, Keycode.SHIFT, Keycode.D)
+            keyboard.release_all()
+            keyboard.press(Keycode.COMMAND, Keycode.SHIFT, Keycode.ENTER)
+            keyboard.release_all()
+            keyboard.press(Keycode.CONTROL, Keycode.E)
+            keyboard.release_all()
+            keyboard.press(Keycode.ENTER)
+            keyboard.release_all()
+            keyboard.press(Keycode.COMMAND, Keycode.PERIOD)
+        elif event.key_number == 3:
+            # Open link under cursor in sidebar
+            keyboard.press(Keycode.CONTROL, Keycode.SHIFT, Keycode.O)
+        elif event.key_number == 4:
+            set_app_switching(keyboard)
+        elif event.key_number == 8:
+            # Toggle Full Screen
+            keyboard.press(Keycode.CONTROL, Keycode.COMMAND, Keycode.F)
+        else:
+            keyboard.press(KEYMAP[event.key_number])
+    else:
+        keyboard.release_all()
+
 
 def handle_app_switching(event, keyboard):
     global current_layer
@@ -102,7 +132,7 @@ def set_app_switching(keyboard):
 LAYERS = [
   handle_vs,
   handle_superhuman,
-  None,
+  handle_roam,
   None,
   handle_app_switching
 ]
@@ -130,17 +160,18 @@ def process_keypress(event, keyboard):
 
     layout = KeyboardLayoutUS(keyboard)
 
-    if LAYERS[current_layer]:
-        LAYERS[current_layer](event, keyboard)
-    else:
+    if event.key_number == 4:
         if event.pressed:
-            if event.key_number == 4:
-                set_app_switching(keyboard)
-            else:
-                keyboard.press(KEYMAP[event.key_number])        
+            set_app_switching(keyboard)
         else:
             keyboard.release_all()
-        current_layer = 4
+    else:
+        if LAYERS[current_layer]:
+            LAYERS[current_layer](event, keyboard)
+        else:
+            if !event.pressed:
+                keyboard.release_all()
+            current_layer = 4
 
 # -------------------------------------------------------------------------------
 # You don't need to change anything below this line, but its fun to follow along!

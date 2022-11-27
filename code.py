@@ -113,13 +113,19 @@ def handle_app_switching(event, keyboard):
         if event.key_number == 0:
             layout.write("Visual Studio Code")
             keyboard.press(Keycode.ENTER)
-            current_layer = 0
+
         if event.key_number == 2:
             layout.write("Superhuman")
             keyboard.press(Keycode.ENTER)
-            current_layer = 1
+
+        if event.key_number == 3:
+            layout.write("Roam Research")
+            keyboard.press(Keycode.ENTER)
+
         if event.key_number == 4:
             set_app_switching(keyboard)
+
+        current_layer = event.key_number
     else:
         keyboard.release_all()
 
@@ -130,11 +136,9 @@ def set_app_switching(keyboard):
     current_layer = 4
 
 LAYERS = [
-  handle_vs,
-  handle_superhuman,
-  handle_roam,
-  None,
-  handle_app_switching
+  handle_vs, None, handle_superhuman,
+  handle_roam, handle_app_switching, None,
+  None, None, None
 ]
 
 def process_keypress(event, keyboard):
@@ -169,7 +173,7 @@ def process_keypress(event, keyboard):
         if LAYERS[current_layer]:
             LAYERS[current_layer](event, keyboard)
         else:
-            if !event.pressed:
+            if not event.pressed:
                 keyboard.release_all()
             current_layer = 4
 
